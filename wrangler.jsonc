@@ -1,0 +1,34 @@
+{
+  // Cloudflare Workers 배포 설정
+  //
+  // Cloudflare 대시보드의 Root directory 가 '/' 이므로
+  // 이 파일과 package.json 을 저장소 최상위에 둡니다.
+  // 실제 홈페이지 소스는 site/ 안에 있고, 빌드 결과가 site/dist 에 만들어집니다.
+  //
+  // worker/index.js 는 관리자 화면(/admin) 로그인만 처리하고,
+  // 나머지 모든 주소는 site/dist 의 정적 파일을 그대로 내보냅니다.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "daegu-sarang-church",
+  "compatibility_date": "2026-07-01",
+  "main": "./worker/index.js",
+  // workers.dev 임시 주소를 계속 켜 둡니다. (한 번 꺼졌다가 복구한 적이 있어
+  // 실수로 다시 꺼지지 않도록 명시적으로 적어 둡니다)
+  "workers_dev": true,
+  "assets": {
+    // astro build 결과물
+    "directory": "./site/dist",
+    // worker 코드에서 정적 파일을 내보낼 때 쓰는 이름
+    "binding": "ASSETS",
+    // 없는 주소로 들어오면 404 페이지를 보여줍니다
+    "not_found_handling": "404-page",
+    // 로그인 관련 주소는 정적 파일보다 worker 를 먼저 태웁니다
+    "run_worker_first": ["/api/*"]
+  },
+  "observability": {
+    "enabled": true
+  },
+  // 방문자 카운터 값을 저장하는 KV 네임스페이스
+  "kv_namespaces": [
+    { "binding": "VISITS", "id": "47743bb25724427982326cc4da6d5242" }
+  ]
+}

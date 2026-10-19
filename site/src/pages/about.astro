@@ -1,0 +1,336 @@
+---
+import Base from "../layouts/Base.astro";
+import PageHeader from "../components/PageHeader.astro";
+import { church, intro, visions, officers, heritagePhotos } from "../data/church";
+
+/** 자선냄비 소개 */
+const kettleFacts = [
+  {
+    label: "시작 · 1891년",
+    desc: "미국 샌프란시스코의 구세군 사관 조셉 맥피가 크리스마스를 앞두고 어려운 이웃을 돕기 위해 큰 냄비에 모금을 받은 것이 시초입니다.",
+  },
+  {
+    label: "한국 · 1928년",
+    desc: "흉년으로 많은 이들이 어려움을 겪던 시절, 종로 거리에서 처음 모금을 시작한 이래 오늘날까지 이어지고 있습니다.",
+  },
+  {
+    label: "오늘날",
+    desc: "매년 성탄절 전후로 전국 거리와 백화점에서 만날 수 있으며, 모금액 사용 내역은 투명하게 공개됩니다.",
+  },
+];
+
+/** 처음 오시는 분을 위한 구세군 용어 안내 */
+const terms = [
+  {
+    term: "영문 (營門)",
+    desc: "구세군에서 교회를 부르는 전통적인 말입니다. 주보나 공문에 ‘구세군대구사랑영문’이라고 적힌 것을 보셨다면 이곳과 같은 곳입니다. 이 홈페이지에서는 ‘구세군 대구사랑교회’로 통일해 부릅니다.",
+  },
+  {
+    term: "사관 (士官)",
+    desc: "다른 교단의 목사에 해당하는 성직자입니다. 교회를 맡아 섬기는 사관을 담임사관이라고 부릅니다.",
+  },
+  {
+    term: "참령 · 정위",
+    desc: "사관의 계급을 나타내는 말입니다. 이름 앞에 함께 적습니다. 참령은 정위로 오래 사역한 사관에게 주어지는 계급으로, 우리 교회 담임사관·목양담당사관도 참령입니다.",
+  },
+  {
+    term: "성결예배",
+    desc: "주일 오전에 드리는 대표 예배입니다. 다른 교회의 주일 대예배와 같습니다.",
+  },
+  {
+    term: "병사 (兵士)",
+    desc: "입대 서약을 하고 구세군의 정식 교인이 된 성도를 말합니다.",
+  },
+  {
+    term: "부교 · 정교",
+    desc: "교회를 섬기도록 임명된 평신도 직분입니다.",
+  },
+  {
+    term: "군국표어",
+    desc: "한 해 동안 구세군 전체가 함께 붙드는 표어입니다. 2026년은 ‘삶으로 증언하라’입니다.",
+  },
+  {
+    term: "자선냄비",
+    desc: "연말 거리에서 진행하는 구세군의 이웃 돕기 모금입니다. 1891년 미국에서 시작되어 지금은 구세군을 대표하는 상징이 되었습니다.",
+  },
+  {
+    term: "가정단",
+    desc: "여성 성도들의 모임입니다. 다른 교단의 여전도회와 비슷합니다. 헌금 항목의 '가정단비'는 이 모임을 위한 헌금입니다.",
+  },
+  {
+    term: "자선봉사단",
+    desc: "지역을 섬기는 봉사를 맡은 모임입니다. 헌금 항목의 '자선단비'는 이 모임을 위한 헌금입니다.",
+  },
+];
+---
+
+<Base
+  title="교회 소개"
+  description={`${church.name} 소개 — 구세군은 1865년 영국 런던에서 창립된 기독교 교단입니다.`}
+>
+  <PageHeader
+    eyebrow="교회 소개"
+    title="구세군 대구사랑교회입니다"
+    description="예배와 삶 속에서 하나님을 깊이 인격적으로 경험하여, 세상 가운데 하나님을 전하는 교회입니다."
+  />
+
+  {/* ─── 인사말 ─────────────────────────────────────── */}
+  {
+    intro.greeting && (
+      <section class="relative isolate overflow-hidden border-b border-sa-line bg-sa-surface py-24 md:py-28">
+        {/*
+          지난 발자취 사진을 워터마크처럼 배경에 옅게 깔아 둡니다.
+          첫 번째 사진은 전체 배경, 두 번째 사진은 모서리 장식으로 씁니다.
+          위에 표면색 그라데이션을 한 겹 더 얹어 글씨가 잘 읽히도록 톤을 낮춥니다.
+        */}
+        {heritagePhotos[0] ? (
+          <div class="pointer-events-none absolute inset-0 opacity-35" aria-hidden="true">
+            <img src={heritagePhotos[0].src} alt="" class="h-full w-full object-cover object-bottom grayscale" />
+          </div>
+        ) : (
+          <img
+            src="/images/shield-512.png"
+            alt=""
+            aria-hidden="true"
+            class="pointer-events-none absolute -right-16 -top-16 w-72 -rotate-12 opacity-[0.04] sm:w-96"
+          />
+        )}
+        <div
+          class="pointer-events-none absolute inset-0 bg-gradient-to-b from-sa-surface/55 via-sa-surface/75 to-sa-surface/95"
+          aria-hidden="true"
+        />
+        {heritagePhotos[1] && (
+          <img
+            src={heritagePhotos[1].src}
+            alt=""
+            aria-hidden="true"
+            class="pointer-events-none absolute -right-10 -bottom-10 w-72 rotate-6 rounded-lg opacity-30 grayscale sm:w-96"
+          />
+        )}
+
+        <div class="relative mx-auto max-w-3xl px-5 text-center">
+          <p class="eyebrow justify-center">인사말</p>
+
+          <div class="relative mt-10">
+            <span
+              aria-hidden="true"
+              class="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 font-serif text-8xl leading-none text-sa-red/15 sm:text-9xl"
+            >
+              “
+            </span>
+            <p class="relative text-xl font-bold leading-relaxed text-sa-ink sm:text-2xl">
+              {intro.greeting}
+            </p>
+          </div>
+
+          <div class="mx-auto mt-9 flex items-center justify-center gap-3">
+            <span class="h-px w-10 bg-sa-line" />
+            <span class="h-1.5 w-1.5 rounded-full bg-sa-red" />
+            <span class="h-px w-10 bg-sa-line" />
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  {/* ─── 구세군이란 ─────────────────────────────────── */}
+  <section class="py-20 md:py-24">
+    <div class="mx-auto max-w-6xl px-5">
+      <div class="grid items-start gap-14 lg:grid-cols-[auto_1fr]">
+        <img
+          src="/images/shield-512.png"
+          alt="구세군 방패 로고"
+          width="200"
+          height="226"
+          class="mx-auto h-auto w-36 lg:w-48"
+        />
+        <div>
+          <p class="eyebrow">구세군이란</p>
+          <h2 class="mt-4 text-2xl font-bold sm:text-3xl">
+            마음은 하나님께, 손길은 이웃에게
+          </h2>
+          <p class="mt-6 leading-relaxed text-sa-muted">{intro.salvationArmy}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* ─── 자선냄비 ───────────────────────────────────── */}
+  <section class="bg-sa-red-soft py-20 md:py-24">
+    <div class="mx-auto max-w-6xl px-5">
+      <p class="eyebrow">구세군의 상징</p>
+      <h2 class="mt-4 text-2xl font-bold sm:text-3xl">
+        자선냄비, 사랑의 손길을 전합니다
+      </h2>
+      <p class="mt-6 max-w-3xl leading-relaxed text-sa-muted">
+        성탄절이 되면 거리에서 종소리와 함께 만나는 자선냄비는 구세군을
+        대표하는 상징입니다. 작은 냄비 하나에 담긴 정성이 한 해 동안 어려운
+        이웃에게 전해집니다.
+      </p>
+
+      <div class="mt-12 grid gap-6 sm:grid-cols-3">
+        {
+          kettleFacts.map((f) => (
+            <div class="rounded-xl bg-white p-7">
+              <p class="text-sm font-bold text-sa-red">{f.label}</p>
+              <p class="mt-3 leading-relaxed text-sa-ink">{f.desc}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  {/* ─── 구세군 선교선언문 ──────────────────────────── */}
+  {
+    intro.missionStatement.length > 0 && (
+      <section class="bg-sa-navy py-20 text-white md:py-24">
+        <div class="mx-auto max-w-4xl px-5">
+          <p class="text-sm font-bold tracking-[0.1em] text-sa-gold">
+            Mission Statement
+          </p>
+          <h2 class="mt-4 text-2xl font-bold sm:text-3xl">구세군 선교선언문</h2>
+          <ol class="mt-10 space-y-5">
+            {intro.missionStatement.map((line, i) => (
+              <li class="flex gap-4 border-b border-white/10 pb-5 last:border-0">
+                <span class="shrink-0 text-lg font-bold text-sa-gold">
+                  {i + 1}
+                </span>
+                <p class="text-lg leading-relaxed text-white/90">{line}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+    )
+  }
+
+  {/* ─── 우리 교회 ──────────────────────────────────── */}
+  <section class="bg-sa-surface py-20 md:py-24">
+    <div class="mx-auto max-w-6xl px-5">
+      <p class="eyebrow">우리 교회</p>
+      <h2 class="mt-4 text-2xl font-bold sm:text-3xl">
+        생명이 살아나는 진정한 부흥을 꿈꿉니다
+      </h2>
+      <p class="mt-6 max-w-3xl text-lg leading-relaxed text-sa-muted">
+        {intro.ourChurch}
+      </p>
+    </div>
+  </section>
+
+  {/* ─── 2026 군국표어 ─────────────────────────────────── */}
+  <section class="bg-sa-surface py-20 md:py-24">
+    <div class="mx-auto max-w-6xl px-5">
+      <div class="grid items-center gap-12 lg:grid-cols-2">
+        <div class="flex justify-center lg:justify-start">
+          <picture>
+            <source srcset="/images/emblem-900.webp" type="image/webp" />
+            <img
+              src="/images/emblem-900.png"
+              alt="2026 구세군 군국표어 엠블럼 — 삶으로 증언하라 (사도행전 1장 8절)"
+              width="900"
+              height="540"
+              loading="lazy"
+              class="w-full max-w-md"
+            />
+          </picture>
+        </div>
+
+        <div>
+          <p class="eyebrow">2026 군국표어</p>
+          <h2 class="mt-4 text-3xl font-bold sm:text-4xl">삶으로 증언하라</h2>
+          <blockquote class="mt-7 border-l-4 border-sa-gold pl-6">
+            <p class="text-lg leading-relaxed">
+              “오직 성령이 너희에게 임하시면 너희가 권능을 받고 예루살렘과 온
+              유대와 사마리아와 땅 끝까지 이르러 내 증인이 되리라”
+            </p>
+            <cite class="mt-3 block font-bold not-italic text-sa-muted">
+              사도행전 1장 8절
+            </cite>
+          </blockquote>
+          <p class="mt-7 leading-relaxed text-sa-muted">
+            말로만 전하는 것이 아니라, 살아가는 삶으로 예수 그리스도를 증언하는
+            한 해가 되기를 소망합니다.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* ─── 비전 ───────────────────────────────────────── */}
+  <section class="bg-sa-navy py-20 text-white md:py-24">
+    <div class="mx-auto max-w-6xl px-5">
+      <p class="text-sm font-bold tracking-[0.1em] text-sa-gold">교회 비전</p>
+      <h2 class="mt-4 text-2xl font-bold sm:text-3xl">
+        우리가 함께 바라보는 여섯 가지
+      </h2>
+      <ol class="mt-12 grid gap-x-10 gap-y-7 md:grid-cols-2">
+        {
+          visions.map((v, i) => (
+            <li class="flex gap-5 border-b border-white/10 pb-6">
+              <span class="shrink-0 text-2xl font-bold text-sa-gold">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <p class="pt-1 text-lg leading-relaxed text-white/85">{v}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  {/* ─── 섬기는 이들 ────────────────────────────────── */}
+  <section class="py-20 md:py-24">
+    <div class="mx-auto max-w-6xl px-5">
+      <p class="eyebrow">섬기는 이들</p>
+      <h2 class="mt-4 text-2xl font-bold sm:text-3xl">교회를 섬기는 사관</h2>
+
+      <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {
+          officers.map((o) => (
+            <div class="rounded-xl border border-sa-line p-8 text-center">
+              <p class="text-sm font-bold text-sa-red">{o.role}</p>
+              <p class="mt-4 text-2xl font-bold">
+                {o.name}
+                <span class="ml-1.5 text-base font-bold text-sa-muted">사관</span>
+              </p>
+              <p class="mt-2 text-sm text-sa-muted">{o.rank}</p>
+            </div>
+          ))
+        }
+      </div>
+
+      <p class="mt-8 text-sm text-sa-muted">
+        문의는 이메일
+        <a
+          href={`mailto:${church.email}`}
+          class="font-bold text-sa-red hover:underline">{church.email}</a
+        >
+        으로 연락해 주시기 바랍니다.
+      </p>
+    </div>
+  </section>
+
+  {/* ─── 용어 안내 ──────────────────────────────────── */}
+  <section class="bg-sa-surface py-20 md:py-24">
+    <div class="mx-auto max-w-6xl px-5">
+      <p class="eyebrow">처음 오시는 분께</p>
+      <h2 class="mt-4 text-2xl font-bold sm:text-3xl">구세군 용어 안내</h2>
+      <p class="mt-5 max-w-2xl text-sa-muted">
+        구세군에는 조금 낯설게 들리는 말들이 있습니다. 몰라도 예배드리는 데는
+        아무 지장이 없지만, 미리 알아두시면 편하실 것 같아 정리했습니다.
+      </p>
+
+      <dl class="mt-12 grid gap-x-12 gap-y-8 md:grid-cols-2">
+        {
+          terms.map((t) => (
+            <div class="border-l-3 border-sa-gold pl-5">
+              <dt class="font-bold">{t.term}</dt>
+              <dd class="mt-1.5 leading-relaxed text-sa-muted">{t.desc}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>구세군 대구사랑교회 · 홈페이지 관리</title>
+    <style>
+      /*
+        반영 지연 안내 배너.
+        Sveltia CMS가 자기 화면을 어떻게 그려 넣을지 이 파일 안에서는
+        알 수 없어서(자바스크립트로 나중에 body를 채웁니다),
+        항상 맨 위에 떠 있도록 fixed 로 고정해 CMS 화면에 가려지지
+        않게 합니다.
+      */
+      #delay-notice {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 999999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.55rem 1rem;
+        background: #da0e2c;
+        color: #fff;
+        font: 13px/1.5 -apple-system, BlinkMacSystemFont, "Malgun Gothic",
+          "Apple SD Gothic Neo", sans-serif;
+        text-align: center;
+      }
+      #delay-notice button {
+        background: rgba(255, 255, 255, 0.18);
+        border: none;
+        color: #fff;
+        border-radius: 4px;
+        padding: 0.15rem 0.55rem;
+        font-size: 12px;
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+      #delay-notice button:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+      #delay-notice a {
+        color: #fff;
+        background: rgba(255, 255, 255, 0.18);
+        border-radius: 4px;
+        padding: 0.15rem 0.55rem;
+        text-decoration: none;
+        flex-shrink: 0;
+        white-space: nowrap;
+      }
+      #delay-notice a:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+      /*
+        메뉴 안내 바로가기.
+        배너(#delay-notice)는 10초 뒤 사라지므로, 언제든 다시 찾을 수
+        있도록 화면 오른쪽 아래에 따로 고정해 둡니다.
+      */
+      #guide-link {
+        position: fixed;
+        right: 1rem;
+        bottom: 1rem;
+        z-index: 999999;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        background: #1f2a44;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 999px;
+        padding: 0.55rem 1rem;
+        font: 700 13px/1 -apple-system, BlinkMacSystemFont, "Malgun Gothic",
+          "Apple SD Gothic Neo", sans-serif;
+        box-shadow: 0 2px 10px rgb(0 0 0 / 0.25);
+      }
+      #guide-link:hover {
+        background: #2a3759;
+      }
+    </style>
+  </head>
+  <body>
+    <!--
+      Sveltia CMS — 깃 기반 관리자 화면
+      로그인하면 공지사항·설교 영상을 글쓰기 화면에서 등록할 수 있습니다.
+      저장하면 저장소에 파일로 기록되고, 1~2분 뒤 홈페이지에 자동 반영됩니다.
+
+      버전을 고정해 두었습니다.
+      관리자 화면은 아무도 손대지 않는 사이에 새 버전이 나올 수 있는데,
+      고정해 두지 않으면 어느 날 갑자기 동작이 바뀔 수 있기 때문입니다.
+      올릴 때는 아래 버전 번호만 바꾸고 화면이 정상인지 확인하면 됩니다.
+    -->
+    <div id="delay-notice">
+      <span>
+        📌 안내: 여기서 저장(Publish)해도 홈페이지에는 바로 반영되지 않습니다.
+        1~2분 정도 걸리니, 저장 후 조금 기다렸다가 홈페이지를 새로고침해서 확인해 주세요.
+      </span>
+      <a href="/admin/hero/">🖼 배경 사진 위치 맞추기</a>
+      <button type="button" onclick="this.parentElement.remove()">닫기</button>
+    </div>
+    <a id="guide-link" href="/admin/guide/">📖 메뉴 안내 보기</a>
+    <script>
+      // 10초 뒤 자동으로 사라집니다. 그 전에 직접 닫으면(위 버튼) 이미
+      // 화면에서 없어졌으니 아래 코드는 조용히 아무 일도 하지 않습니다.
+      setTimeout(function () {
+        var notice = document.getElementById("delay-notice");
+        if (notice) notice.remove();
+      }, 10000);
+    </script>
+    <script src="https://unpkg.com/@sveltia/cms@0.173.0/dist/sveltia-cms.js"></script>
+  </body>
+</html>

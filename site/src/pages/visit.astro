@@ -1,0 +1,134 @@
+---
+import Base from "../layouts/Base.astro";
+import PageHeader from "../components/PageHeader.astro";
+import { church, mainServices } from "../data/church";
+
+const query = encodeURIComponent(`${church.address} 구세군 대구사랑교회`);
+const maps = [
+  {
+    name: "카카오맵",
+    href: `https://map.kakao.com/?q=${query}`,
+    desc: "길찾기 · 로드뷰",
+  },
+  {
+    name: "네이버 지도",
+    href: `https://map.naver.com/p/search/${query}`,
+    desc: "길찾기 · 거리뷰",
+  },
+  {
+    name: "구글 지도",
+    href: `https://www.google.com/maps/search/?api=1&query=${query}`,
+    desc: "길찾기",
+  },
+];
+---
+
+<Base
+  title="오시는 길"
+  description={`${church.name} 위치 안내 — ${church.address}. 이메일 ${church.email}.`}
+>
+  <PageHeader
+    eyebrow="오시는 길"
+    title="교회로 오시는 길"
+    description="찾아오시기 어려우시면 언제든 이메일로 문의해 주세요. 안내해 드리겠습니다."
+  />
+
+  <section class="py-20 md:py-24">
+    <div class="mx-auto max-w-6xl px-5">
+      <div class="grid gap-12 lg:grid-cols-2">
+        {/* 주소 · 연락처 */}
+        <div>
+          <h2 class="text-2xl font-bold">{church.name}</h2>
+          <p class="mt-1 text-sm tracking-wide text-sa-muted">
+            {church.nameEn}
+          </p>
+
+          <dl class="mt-10 space-y-7">
+            <div class="border-l-3 border-sa-red pl-5">
+              <dt class="text-sm font-bold text-sa-muted">주소</dt>
+              <dd class="mt-1.5 text-lg font-bold">
+                ({church.zipcode}) {church.address}
+              </dd>
+            </div>
+            <div class="border-l-3 border-sa-red pl-5">
+              <dt class="text-sm font-bold text-sa-muted">이메일</dt>
+              <dd class="mt-1.5">
+                <a
+                  href={`mailto:${church.email}`}
+                  class="text-lg font-bold text-sa-red hover:underline break-all"
+                >
+                  {church.email}
+                </a>
+              </dd>
+            </div>
+          </dl>
+
+          {/* 지도 앱으로 연결 */}
+          <div class="mt-10">
+            <h3 class="font-bold">지도에서 보기</h3>
+            <div class="mt-4 grid gap-3 sm:grid-cols-3">
+              {
+                maps.map((m) => (
+                  <a
+                    href={m.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="rounded-lg border border-sa-line p-4 transition-colors hover:border-sa-red hover:bg-sa-red-soft"
+                  >
+                    <span class="block font-bold">{m.name}</span>
+                    <span class="mt-0.5 block text-xs text-sa-muted">
+                      {m.desc}
+                    </span>
+                    <span class="sr-only">(새 창에서 열림)</span>
+                  </a>
+                ))
+              }
+            </div>
+          </div>
+
+          <a
+            href={`mailto:${church.email}`}
+            class="mt-10 inline-flex w-full items-center justify-center gap-2 rounded-md bg-sa-red px-6 py-4 text-lg font-bold text-white transition-colors hover:bg-sa-red-dark sm:w-auto sm:px-10"
+          >
+            이메일로 문의하기
+          </a>
+        </div>
+
+        {/* 예배 시간 */}
+        <div class="rounded-xl bg-sa-surface p-9">
+          <h2 class="text-xl font-bold">예배 시간</h2>
+          <ul class="mt-7 space-y-4">
+            {
+              mainServices.map((s) => (
+                <li class="flex items-baseline justify-between gap-4 border-b border-sa-line pb-4">
+                  <span class="font-bold">{s.name}</span>
+                  <span class="shrink-0 text-lg font-bold text-sa-navy">
+                    {s.time}
+                  </span>
+                </li>
+              ))
+            }
+          </ul>
+          <a
+            href="/worship"
+            class="mt-7 inline-flex items-center gap-2 font-bold text-sa-red hover:underline"
+          >
+            전체 예배와 모임 보기 <span aria-hidden="true">→</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* 처음 오시는 분께 */}
+  <section class="bg-sa-navy py-16 text-white">
+    <div class="mx-auto max-w-6xl px-5">
+      <h2 class="text-xl font-bold text-sa-gold">처음 오시는 분께</h2>
+      <p class="mt-4 max-w-3xl leading-relaxed text-white/80">
+        준비하실 것은 아무것도 없습니다. 편한 복장으로 오셔서 예배만 드리셔도
+        괜찮습니다. 교회를 찾기 어려우시거나 궁금한 점이 있으시면 이메일로
+        문의해 주세요. 반갑게 맞이하겠습니다.
+      </p>
+    </div>
+  </section>
+</Base>

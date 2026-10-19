@@ -1,0 +1,94 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../layouts/Base.astro";
+import PageHeader from "../components/PageHeader.astro";
+import { church, videoDisplay } from "../data/church";
+import VideoGrid from "../components/VideoGrid.astro";
+import {
+  fetchChannelVideos,
+  toVideo,
+  mergeVideos,
+  type Video,
+} from "../lib/youtube";
+
+// 관리자가 직접 등록한 영상 — '일부공개' 영상이나, 유튜브가 자동으로
+// 내주지 않는 예전 영상을 여기에 링크로 등록해 둘 수 있습니다.
+const registered = (await getCollection("videos"))
+  .map((entry) => toVideo(entry.data))
+  .filter((v): v is Video => v !== null);
+
+// 채널의 공개 영상 — 유튜브가 제공하는 최근 15개까지가 한계입니다.
+const feed = await fetchChannelVideos(church.youtubeChannelId, 15);
+
+// 자동으로 불러온 목록 + 직접 등록한 목록을 하나로 합쳐 최신순으로 보여줍니다
+const allVideos = mergeVideos(feed, registered);
+const sermonVideos = allVideos.filter((v) => v.category === "sermon");
+const eventVideos = allVideos.filter((v) => v.category === "event");
+---
+
+<Base
+  title="교회영상"
+  description={`${church.name} 교회영상 — 예배 말씀부터 행사 스케치까지 영상으로 다시 보실 수 있습니다.`}
+>
+  <PageHeader
+    eyebrow="교회영상"
+    title="예배와 행사를 영상으로"
+    description="예배 때 나눈 말씀부터 행사·소식까지, 영상으로 다시 보실 수 있습니다."
+  />
+
+  {/* ─── 설교 영상 ──────────────────────────────────── */}
+  <section class="py-20 md:py-24">
+    <div class="mx-auto max-w-6xl px-5">
+      <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p class="eyebrow">말씀</p>
+          <h2 class="mt-4 text-2xl font-bold sm:text-3xl">설교 영상</h2>
+        </div>
+        <a
+          href={church.youtube}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="font-bold text-sa-red hover:underline"
+        >
+          유튜브 채널 바로가기 →
+        </a>
+      </div>
+
+      {
+        sermonVideos.length > 0 && videoDisplay.pageSermonCount > 0 ? (
+          <VideoGrid
+            videos={allVideos}
+            registered={registered}
+            limit={videoDisplay.pageSermonCount}
+            filter="sermon"
+          />
+        ) : (
+          <p class="mt-12 rounded-xl border border-sa-line bg-white p-8 text-sa-muted">
+            지금은 불러올 설교 영상이 없습니다.
+          </p>
+        )
+      }
+    </div>
+  </section>
+
+  {/* ─── 행사·소식 영상 ─────────────────────────────── */}
+  {
+    eventVideos.length > 0 && videoDisplay.pageEventCount > 0 && (
+      <section class="bg-sa-surface py-20 md:py-24">
+        <div class="mx-auto max-w-6xl px-5">
+          <p class="eyebrow">유튜브</p>
+          <h2 class="mt-4 text-2xl font-bold sm:text-3xl">행사 스케치</h2>
+          <p class="mt-3 text-sa-muted">
+            설교 외에 야외예배, 성경학교 같은 행사 영상입니다.
+          </p>
+          <VideoGrid
+            videos={allVideos}
+            registered={registered}
+            limit={videoDisplay.pageEventCount}
+            filter="event"
+          />
+        </div>
+      </section>
+    )
+  }
+</Base>

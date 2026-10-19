@@ -1,0 +1,33 @@
+# 의존성
+node_modules/
+
+# 빌드 결과물
+site/dist/
+site/.astro/
+.wrangler/
+.vercel/
+.netlify/
+
+# 환경변수 (절대 올리지 말 것)
+.env
+.env.*
+!.env.example
+
+# 원본 자료 — GitHub 파일당 100MB 제한 초과
+# 웹용으로 변환한 이미지는 site/public/images/ 에 있으므로 사이트 동작에는 지장 없음
+# 이 원본은 별도로 백업해 두시기 바랍니다
+자료/images/조감도.jpg
+
+# 폰트 원본 (변환본 site/public/fonts/*.woff2 만 사용)
+자료/fonts/*.otf
+자료/fonts/*.ttf
+자료/fonts/convert.py
+
+# 작업용 임시 파일
+자료/images/_*
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini

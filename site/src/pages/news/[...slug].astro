@@ -1,0 +1,57 @@
+---
+import { getCollection, render } from "astro:content";
+import Base from "../../layouts/Base.astro";
+
+export async function getStaticPaths() {
+  const notices = await getCollection("notices");
+  return notices.map((n) => ({ params: { slug: n.id }, props: { notice: n } }));
+}
+
+const { notice } = Astro.props;
+const { Content } = await render(notice);
+
+const d = notice.data.date;
+const dateText = `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
+---
+
+<Base title={notice.data.title} description={notice.data.summary}>
+  <article class="py-16 md:py-20">
+    <div class="mx-auto max-w-3xl px-5">
+      <a
+        href="/news"
+        class="inline-flex items-center gap-1.5 text-sm font-bold text-sa-muted transition-colors hover:text-sa-red"
+      >
+        <span aria-hidden="true">←</span> 공지사항 목록
+      </a>
+
+      <header class="mt-8 border-b border-sa-line pb-8">
+        <span
+          class="rounded bg-sa-red-soft px-2.5 py-1 text-xs font-bold text-sa-red"
+        >
+          {notice.data.category}
+        </span>
+        <h1 class="mt-4 text-3xl font-bold leading-tight sm:text-4xl">
+          {notice.data.title}
+        </h1>
+        <time datetime={d.toISOString()} class="mt-4 block text-sa-muted">
+          {dateText}
+        </time>
+      </header>
+
+      <div
+        class="prose-notice mt-10 leading-relaxed [&_a]:font-bold [&_a]:text-sa-red [&_a]:underline [&_h3]:mt-9 [&_h3]:text-xl [&_h3]:font-bold [&_li]:my-1.5 [&_p]:my-5 [&_strong]:font-bold [&_table]:my-6 [&_table]:w-full [&_table]:border-collapse [&_td]:border-b [&_td]:border-sa-line [&_td]:py-2.5 [&_th]:border-b-2 [&_th]:border-sa-navy [&_th]:py-2.5 [&_th]:text-left [&_ul]:my-5 [&_ul]:list-disc [&_ul]:pl-6"
+      >
+        <Content />
+      </div>
+
+      <div class="mt-16 border-t border-sa-line pt-8">
+        <a
+          href="/news"
+          class="inline-flex items-center gap-2 rounded-md bg-sa-navy px-6 py-3 font-bold text-white transition-colors hover:bg-sa-navy-dark"
+        >
+          <span aria-hidden="true">←</span> 목록으로 돌아가기
+        </a>
+      </div>
+    </div>
+  </article>
+</Base>

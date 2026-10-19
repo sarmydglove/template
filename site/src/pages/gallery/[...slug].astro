@@ -1,0 +1,225 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../../layouts/Base.astro";
+
+export async function getStaticPaths() {
+  // 비공개 앨범은 페이지 자체를 만들지 않습니다 (주소를 알아도 볼 수 없음)
+  const galleries = await getCollection("galleries", ({ data }) => data.published);
+  return galleries.map((g) => ({ params: { slug: g.id }, props: { gallery: g } }));
+}
+
+const { gallery } = Astro.props;
+const d = gallery.data.date;
+const dateText = `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
+---
+
+<Base
+  title={gallery.data.title}
+  description={`${gallery.data.title} 사진 ${gallery.data.photos.length}장`}
+>
+  <article class="py-16 md:py-20">
+    <div class="mx-auto max-w-5xl px-5">
+      <a
+        href="/gallery"
+        class="inline-flex items-center gap-1.5 text-sm font-bold text-sa-muted transition-colors hover:text-sa-red"
+      >
+        <span aria-hidden="true">←</span> 사진 갤러리
+      </a>
+
+      <header class="mt-8 border-b border-sa-line pb-8">
+        <h1 class="text-3xl font-bold leading-tight sm:text-4xl">
+          {gallery.data.title}
+        </h1>
+        <p class="mt-4 text-sa-muted">
+          {dateText} · 사진 {gallery.data.photos.length}장
+        </p>
+      </header>
+
+      <div class="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3">
+        {
+          gallery.data.photos.map((p, i) => (
+            <button
+              type="button"
+              data-open-photo={i}
+              class="group block aspect-square overflow-hidden rounded-lg border border-sa-line bg-sa-navy/10"
+            >
+              <img
+                src={p}
+                alt=""
+                loading="lazy"
+                class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+            </button>
+          ))
+        }
+      </div>
+    </div>
+  </article>
+
+  {/*
+    사진을 크게 보는 창.
+    목록은 서버가 미리 만들어 두고, 여닫기·넘기기만 화면에서 처리합니다.
+    좌우 화살표 키, 화면의 ‹ › 버튼, 좌우 스와이프로 다음/이전 사진으로 넘어갑니다.
+  */}
+  <dialog
+    id="photo-viewer"
+    class="fixed inset-0 m-0 h-auto max-h-none w-auto max-w-none overflow-hidden border-0 bg-transparent p-0 backdrop:bg-sa-ink/85"
+  >
+    <div
+      class="relative flex h-full w-full flex-col items-center justify-center gap-3 px-14 py-16 sm:px-20"
+    >
+      <button
+        type="button"
+        id="photo-viewer-close"
+        aria-label="닫기"
+        class="absolute top-4 right-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white text-sa-ink shadow-lg"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" />
+        </svg>
+      </button>
+
+      {gallery.data.photos.length > 1 && (
+        <>
+          <button
+            type="button"
+            id="photo-viewer-prev"
+            aria-label="이전 사진"
+            class="absolute left-2 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-sa-ink shadow-lg hover:bg-white sm:left-5"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            id="photo-viewer-next"
+            aria-label="다음 사진"
+            class="absolute right-2 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-sa-ink shadow-lg hover:bg-white sm:right-5"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </button>
+        </>
+      )}
+
+      {/* 사진은 남는 공간만큼만 차지하고, 넘치면 스스로 줄어듭니다 */}
+      <div class="flex min-h-0 w-full flex-1 items-center justify-center">
+        <img
+          id="photo-viewer-img"
+          src=""
+          alt=""
+          class="max-h-full max-w-full rounded-lg object-contain"
+        />
+      </div>
+      {gallery.data.photos.length > 1 && (
+        <p
+          id="photo-viewer-count"
+          class="shrink-0 text-center text-sm text-white/70"
+        />
+      )}
+    </div>
+  </dialog>
+
+  <script define:vars={{ photos: gallery.data.photos }}>
+    const dialog = document.getElementById("photo-viewer");
+    const img = document.getElementById("photo-viewer-img");
+    const countEl = document.getElementById("photo-viewer-count");
+    const closeBtn = document.getElementById("photo-viewer-close");
+    const prevBtn = document.getElementById("photo-viewer-prev");
+    const nextBtn = document.getElementById("photo-viewer-next");
+
+    let current = 0;
+
+    function show(index) {
+      current = (index + photos.length) % photos.length; // 처음/끝에서 반대쪽으로 순환
+      img.src = photos[current];
+      if (countEl) countEl.textContent = `${current + 1} / ${photos.length}`;
+    }
+
+    /*
+     * 창이 열려 있는 동안 배경 스크롤을 잠급니다.
+     * (사진을 보다가 뒤 페이지가 같이 밀려 내려가지 않도록 하는 용도입니다.)
+     *
+     * 참고 — 예전에 창 안쪽에 가로 스크롤바가 생기던 문제는 이 잠금이
+     * 아니라 창 구조 자체의 문제였습니다. 사진이 90vw, 창이 94vw인데
+     * 좌우 화살표 버튼이 음수 위치로 상자 밖에 32px 튀어나와 있어서,
+     * 화면 폭이 800px보다 좁으면 내용이 창보다 넓어졌습니다. 지금은
+     * 창을 화면에 꽉 채우고(vw 단위를 쓰지 않음) 버튼을 안쪽 여백에
+     * 넣어, 넘칠 수 있는 구조 자체를 없앴습니다.
+     *
+     * ⚠️ dialog 의 'close' 이벤트는 브라우저에 따라 Esc 키로 닫을 때
+     * 발생하지 않는 경우가 있어(직접 확인함) 이벤트에 의존하지 않고,
+     * open 속성이 실제로 사라지는 순간을 감시(MutationObserver)해서
+     * 어떤 방법으로 닫히든 확실하게 스크롤을 되돌립니다.
+     */
+    const html = document.documentElement;
+    const body = document.body;
+    let savedHtmlOverflow = "";
+    let savedBodyOverflow = "";
+
+    function lockScroll() {
+      savedHtmlOverflow = html.style.overflow;
+      savedBodyOverflow = body.style.overflow;
+      // html, body 둘 다 잠급니다 — 브라우저마다 스크롤을 담당하는
+      // 요소가 달라(html 만으로는 안 잠기는 경우가 있음) 둘 다 처리합니다.
+      html.style.overflow = "hidden";
+      body.style.overflow = "hidden";
+    }
+
+    function unlockScroll() {
+      html.style.overflow = savedHtmlOverflow;
+      body.style.overflow = savedBodyOverflow;
+    }
+
+    function open(index) {
+      show(index);
+      lockScroll();
+      dialog.showModal();
+    }
+
+    new MutationObserver(() => {
+      if (!dialog.hasAttribute("open")) {
+        unlockScroll();
+      }
+    }).observe(dialog, { attributes: true, attributeFilter: ["open"] });
+
+    document.querySelectorAll("[data-open-photo]").forEach((btn) => {
+      btn.addEventListener("click", () => open(Number(btn.dataset.openPhoto)));
+    });
+
+    closeBtn.addEventListener("click", () => dialog.close());
+    prevBtn?.addEventListener("click", () => show(current - 1));
+    nextBtn?.addEventListener("click", () => show(current + 1));
+
+    // 어두운 바깥 영역을 눌러도 닫힙니다
+    dialog.addEventListener("click", (e) => {
+      if (e.target === dialog) dialog.close();
+    });
+
+    // 열려 있을 때만 좌우 화살표 키로 넘깁니다
+    dialog.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") show(current + 1);
+      if (e.key === "ArrowLeft") show(current - 1);
+    });
+
+    // 휴대폰에서 좌우로 쓸어 넘기기
+    let touchStartX = 0;
+    dialog.addEventListener(
+      "touchstart",
+      (e) => (touchStartX = e.touches[0].clientX),
+      { passive: true },
+    );
+    dialog.addEventListener(
+      "touchend",
+      (e) => {
+        const dx = e.changedTouches[0].clientX - touchStartX;
+        if (Math.abs(dx) < 40) return; // 살짝 스친 건 무시합니다
+        if (dx < 0) show(current + 1);
+        else show(current - 1);
+      },
+      { passive: true },
+    );
+  </script>
+</Base>

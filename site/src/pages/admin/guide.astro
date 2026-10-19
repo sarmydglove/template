@@ -1,0 +1,393 @@
+---
+/**
+ * 관리자 화면 메뉴 안내
+ *
+ * 후임 관리자가 처음 들어왔을 때, 왼쪽 메뉴 하나하나가 무엇을 바꾸는지
+ * 코드를 몰라도 한눈에 알 수 있도록 만든 안내 페이지입니다.
+ * 실제 글쓰기 화면(Sveltia CMS)이 아니라 설명만 있는 페이지라
+ * 로그인 없이도 볼 수 있습니다.
+ *
+ * ⚠️ 여기 적힌 메뉴 이름·설명은 site/src/pages/admin/config.yml.ts 의
+ *    내용과 맞춰 두었습니다. 그 파일에서 메뉴를 추가·삭제하면 이 페이지도
+ *    함께 고쳐주세요.
+ */
+---
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>관리자 화면 안내 · 구세군 대구사랑교회</title>
+    <style>
+      :root {
+        --red: #da0e2c;
+        --navy: #1f2a44;
+        --gold: #f5a623;
+        --ink: #1c1c22;
+        --muted: #6b6b76;
+        --line: #e3e0dc;
+        --surface: #f7f5f2;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Malgun Gothic",
+          "Apple SD Gothic Neo", sans-serif;
+        color: var(--ink);
+        background: var(--surface);
+        line-height: 1.65;
+      }
+      header {
+        background: var(--navy);
+        color: #fff;
+        padding: 1.5rem 1.25rem 1.35rem;
+      }
+      header h1 {
+        margin: 0;
+        font-size: 1.3rem;
+      }
+      header p {
+        margin: 0.45rem 0 0;
+        font-size: 0.9rem;
+        color: rgb(255 255 255 / 0.75);
+        max-width: 40rem;
+      }
+      main {
+        max-width: 46rem;
+        margin: 0 auto;
+        padding: 1.5rem 1.25rem 6rem;
+      }
+      .cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: var(--red);
+        color: #fff;
+        font-weight: 700;
+        text-decoration: none;
+        padding: 0.7rem 1.2rem;
+        border-radius: 8px;
+        margin-top: 1.1rem;
+      }
+      .cta:hover {
+        background: #b30b24;
+      }
+      .quickref {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 1.1rem 1.25rem;
+        margin: 1.75rem 0;
+      }
+      .quickref h2 {
+        margin: 0 0 0.75rem;
+        font-size: 1rem;
+        color: var(--red);
+      }
+      .quickref table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.92rem;
+      }
+      .quickref td {
+        padding: 0.5rem 0.4rem;
+        border-top: 1px solid var(--line);
+        vertical-align: top;
+      }
+      .quickref tr:first-child td {
+        border-top: 0;
+      }
+      .quickref td:first-child {
+        white-space: nowrap;
+        color: var(--muted);
+        padding-right: 1rem;
+      }
+      .quickref td:last-child strong {
+        color: var(--navy);
+      }
+      section.group {
+        margin-top: 2.25rem;
+      }
+      section.group > h2 {
+        font-size: 1.1rem;
+        color: var(--navy);
+        border-bottom: 2px solid var(--navy);
+        padding-bottom: 0.5rem;
+        margin-bottom: 0.9rem;
+      }
+      .item {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 0.95rem 1.15rem;
+        margin-bottom: 0.75rem;
+      }
+      .item h3 {
+        margin: 0 0 0.35rem;
+        font-size: 0.98rem;
+      }
+      .item h3 .path {
+        display: block;
+        font-weight: 400;
+        font-size: 0.78rem;
+        color: var(--muted);
+        margin-top: 0.15rem;
+      }
+      .item p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: #3c3c44;
+      }
+      .item p + p {
+        margin-top: 0.4rem;
+      }
+      .where {
+        display: inline-block;
+        margin-top: 0.5rem;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: var(--navy);
+        background: var(--surface);
+        border-radius: 5px;
+        padding: 0.15rem 0.5rem;
+      }
+      footer {
+        max-width: 46rem;
+        margin: 0 auto;
+        padding: 0 1.25rem 3rem;
+        font-size: 0.82rem;
+        color: var(--muted);
+      }
+      footer a {
+        color: var(--navy);
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>📋 관리자 화면 안내</h1>
+      <p>
+        왼쪽 메뉴 하나하나가 홈페이지의 어디에, 무엇을 바꾸는지 정리했습니다.
+        코드를 몰라도 됩니다 — 여기서 어떤 메뉴인지 확인하고, 아래 버튼으로
+        실제 글쓰기 화면으로 들어가시면 됩니다.
+      </p>
+      <a class="cta" href="/admin/">✍️ 글쓰기 화면 열기 →</a>
+    </header>
+
+    <main>
+      <div class="quickref">
+        <h2>🔎 이럴 때는 여기로</h2>
+        <table>
+          <tbody>
+            <tr>
+              <td>공지·행사 소식 올리기</td>
+              <td><strong>공지사항</strong></td>
+            </tr>
+            <tr>
+              <td>예배 시간·모임 시간이 바뀌었을 때</td>
+              <td><strong>사이트 설정 → 예배 시간 · 모임</strong></td>
+            </tr>
+            <tr>
+              <td>담임사관·부담임사관이 바뀌었을 때</td>
+              <td><strong>사이트 설정 → 섬기는 사관</strong></td>
+            </tr>
+            <tr>
+              <td>연락처(이메일)·주소가 바뀌었을 때</td>
+              <td><strong>사이트 설정 → 기본 정보</strong></td>
+            </tr>
+            <tr>
+              <td>행사·수련회 사진 여러 장 올리기</td>
+              <td><strong>사진 갤러리</strong></td>
+            </tr>
+            <tr>
+              <td>일부공개 영상, 오래된 영상 등록하기</td>
+              <td><strong>영상 직접 추가</strong></td>
+            </tr>
+            <tr>
+              <td>메인 화면 맨 위 큰 사진 바꾸기</td>
+              <td><strong>사이트 설정 → 메인 화면 배경 사진</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <section class="group">
+        <h2>사이트 설정</h2>
+        <p style="font-size:0.88rem;color:var(--muted);margin-top:-0.4rem;">
+          자주 바뀌는 교회 정보를 항목별로 나눠 두었습니다. 클릭해서 들어가면
+          그 항목만 고칠 수 있습니다.
+        </p>
+
+        <div class="item">
+          <h3>메뉴 이름</h3>
+          <p>
+            화면 맨 위 메뉴(교회 소개·예배와 모임·설교·사역·사진·소식·오시는 길)에
+            표시되는 글자를 바꿉니다. 이동하는 주소는 그대로입니다.
+          </p>
+          <span class="where">머리글(모든 페이지)</span>
+        </div>
+
+        <div class="item">
+          <h3>기본 정보</h3>
+          <p>슬로건, 문의 이메일, 주소, 우편번호를 바꿉니다.</p>
+          <span class="where">여러 페이지에 두루 쓰임</span>
+        </div>
+
+        <div class="item">
+          <h3>메인 화면 배경 사진</h3>
+          <p>
+            첫 화면 맨 위 큰 배경 사진입니다. 여러 장 올리면 자동으로 넘어갑니다.
+            사진이 잘리는 위치는 여기서 못 맞추고, 별도 화면(🖼 배경 사진
+            위치 맞추기)에서 끌어서 맞춥니다.
+          </p>
+          <span class="where">첫 화면 맨 위</span>
+        </div>
+
+        <div class="item">
+          <h3>예배 시간 · 모임</h3>
+          <p>
+            주요 예배 시간, 기도회, 교회학교·청년회 등 각 모임 시간을 바꿉니다.
+            각 모임에는 사진이나 짧은 영상을 넣어 마우스를 올렸을 때 배경으로
+            나오게 할 수도 있습니다.
+          </p>
+          <span class="where">예배와 모임 페이지, 첫 화면</span>
+        </div>
+
+        <div class="item">
+          <h3>섬기는 사관</h3>
+          <p>담임사관·목양담당사관·부담임사관의 직책·계급·성함을 바꿉니다.</p>
+          <span class="where">주보 성격의 여러 곳</span>
+        </div>
+
+        <div class="item">
+          <h3>교회 비전</h3>
+          <p>교회 비전 문장들을 목록으로 바꿉니다.</p>
+          <span class="where">첫 화면 비전 영역</span>
+        </div>
+
+        <div class="item">
+          <h3>교회 소개 문안</h3>
+          <p>
+            인사말, 구세군 소개, 우리 교회 소개, 선교선언문 등 긴 글을
+            바꿉니다.
+          </p>
+          <span class="where">교회 소개 페이지</span>
+        </div>
+
+        <div class="item">
+          <h3>예배 풍경 사진</h3>
+          <p>
+            예배와 모임 페이지 맨 위에 옅게 깔리는 배경 사진(워터마크)과,
+            그 아래 그리드로 보여줄 사진들을 올립니다. 첫 번째 사진은 진하기·
+            위치(%)를 숫자로 조절할 수 있습니다.
+          </p>
+          <span class="where">예배와 모임 페이지</span>
+        </div>
+
+        <div class="item">
+          <h3>지난 발자취 사진</h3>
+          <p>교회 소개 페이지 인사말 옆에 강조해서 보여줄 옛날 사진 2~4장입니다.</p>
+          <span class="where">교회 소개 페이지</span>
+        </div>
+
+        <div class="item">
+          <h3>사역 소개 · 교회 건축</h3>
+          <p>
+            신축 성전 설계 컨셉 한 문장과, 사역 소개 상자들(제목·설명·배경
+            사진)을 바꿉니다.
+          </p>
+          <span class="where">사역 페이지</span>
+        </div>
+
+        <div class="item">
+          <h3>영상 노출 개수</h3>
+          <p>
+            첫 화면과 교회영상 페이지에 설교·행사 영상을 몇 개까지 보여줄지
+            숫자로 정합니다. (유튜브 최근 15개 안에서만 자동으로 가져올 수
+            있는 한계가 있습니다)
+          </p>
+          <span class="where">첫 화면, 교회영상 페이지</span>
+        </div>
+      </section>
+
+      <section class="group">
+        <h2>공지사항</h2>
+        <div class="item">
+          <h3>공지사항</h3>
+          <p>
+            주보의 '교회소식' 중 홈페이지에 실어도 되는 내용을 한 건씩
+            등록합니다. 분류(공지/행사/모집/기도)를 고르고, 목록 맨 위에
+            고정할지도 정할 수 있습니다.
+          </p>
+          <p>
+            <strong>올리면 안 되는 것</strong> — 헌금자·봉사위원 명단, 사관
+            개인 연락처·휴가 일정, 개인 경조사, 다른 교회 순수 내부 행사.
+          </p>
+          <span class="where">소식 페이지</span>
+        </div>
+      </section>
+
+      <section class="group">
+        <h2>영상 직접 추가</h2>
+        <div class="item">
+          <h3>영상 직접 추가</h3>
+          <p>
+            유튜브에 <strong>공개</strong>로 올린 최근 영상은 자동으로
+            불러오므로 등록할 필요가 없습니다. 다음 두 경우만 여기서 직접
+            등록합니다 — ① <strong>일부공개</strong> 영상(채널 목록에 안 뜸),
+            ② 채널 최근 15개보다 예전에 올린 영상.
+          </p>
+          <span class="where">교회영상 페이지, 첫 화면</span>
+        </div>
+      </section>
+
+      <section class="group">
+        <h2>사진 갤러리</h2>
+        <div class="item">
+          <h3>사진 갤러리</h3>
+          <p>
+            행사 이름으로 앨범을 만들고 사진을 한 번에 여러 장 올립니다.
+            <strong>기본은 비공개</strong>입니다 — 사진을 다 올리고 얼굴·
+            이름표 등을 확인한 뒤 '공개 여부'를 체크해야 방문자에게 보입니다.
+            식사봉사 등 지역 섬김 활동이면 '지역 섬김 활동'도 체크해 주세요.
+          </p>
+          <span class="where">사진 페이지, (지역 섬김 체크 시) 사역 페이지</span>
+        </div>
+      </section>
+
+      <section class="group">
+        <h2>글쓰기 화면 밖 별도 도구</h2>
+        <p style="font-size:0.88rem;color:var(--muted);margin-top:-0.4rem;">
+          아래는 Sveltia CMS(글쓰기 화면) 안에 넣을 수 없는 기능이라
+          따로 만든 화면입니다. 로그인은 글쓰기 화면과 같습니다.
+        </p>
+
+        <div class="item">
+          <h3>
+            🖼 배경 사진 위치 맞추기
+            <span class="path">/admin/hero</span>
+          </h3>
+          <p>
+            메인 화면 배경 사진에서 어느 부분을 보여줄지 사진을 직접
+            끌어서(드래그) 맞추는 도구입니다.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>
+        더 자세한 배경 설명은 저장소의
+        <code>README.md</code>를 참고하세요. 이 안내와 실제 메뉴가 다르게
+        보인다면, 그사이 메뉴가 추가되거나 바뀐 것이니 개발을 도와준 분께
+        문의해 주세요.
+      </p>
+      <p><a href="/admin/">← 글쓰기 화면으로 돌아가기</a></p>
+    </footer>
+  </body>
+</html>

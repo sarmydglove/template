@@ -1,0 +1,92 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import PageHeader from "../../components/PageHeader.astro";
+import { church } from "../../data/church";
+
+const notices = (await getCollection("notices")).sort((a, b) => {
+  // 고정 글을 맨 위로, 그 다음 최신순
+  if (a.data.pinned !== b.data.pinned) return a.data.pinned ? -1 : 1;
+  return b.data.date.valueOf() - a.data.date.valueOf();
+});
+
+const categoryStyle: Record<string, string> = {
+  공지: "bg-sa-navy/10 text-sa-navy",
+  행사: "bg-sa-red-soft text-sa-red",
+  모집: "bg-sa-gold/20 text-sa-burgundy",
+  기도: "bg-sa-navy text-white",
+};
+
+const fmt = (d: Date) =>
+  `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(
+    d.getDate(),
+  ).padStart(2, "0")}`;
+---
+
+<Base
+  title="소식"
+  description={`${church.name} 공지사항 — 교회 소식과 행사 안내를 전해드립니다.`}
+>
+  <PageHeader
+    eyebrow="소식"
+    title="공지사항"
+    description="교회 소식과 행사 안내를 전해드립니다."
+  />
+
+  <section class="py-20 md:py-24">
+    <div class="mx-auto max-w-4xl px-5">
+      {
+        notices.length > 0 ? (
+          <ul class="divide-y divide-sa-line border-y border-sa-line">
+            {notices.map((n) => (
+              <li>
+                <a
+                  href={`/news/${n.id}`}
+                  class="group flex flex-col gap-2 py-7 transition-colors hover:bg-sa-surface sm:flex-row sm:items-baseline sm:gap-6 sm:px-4"
+                >
+                  <div class="flex shrink-0 items-center gap-3">
+                    {n.data.pinned && (
+                      <span class="rounded bg-sa-red px-2 py-0.5 text-xs font-bold text-white">
+                        고정
+                      </span>
+                    )}
+                    <span
+                      class:list={[
+                        "rounded px-2.5 py-1 text-xs font-bold",
+                        categoryStyle[n.data.category],
+                      ]}
+                    >
+                      {n.data.category}
+                    </span>
+                  </div>
+
+                  <div class="min-w-0 flex-1">
+                    <h2 class="text-lg font-bold leading-snug group-hover:text-sa-red">
+                      {n.data.title}
+                    </h2>
+                    {n.data.summary && (
+                      <p class="mt-1.5 line-clamp-2 text-sa-muted">
+                        {n.data.summary}
+                      </p>
+                    )}
+                  </div>
+
+                  <time
+                    datetime={n.data.date.toISOString()}
+                    class="shrink-0 text-sm text-sa-muted"
+                  >
+                    {fmt(n.data.date)}
+                  </time>
+                </a>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p class="rounded-xl border border-sa-line bg-sa-surface p-10 text-center text-sa-muted">
+            아직 등록된 소식이 없습니다.
+          </p>
+        )
+      }
+    </div>
+  </section>
+</Base>

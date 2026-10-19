@@ -1,0 +1,362 @@
+---
+import { formatDate, type Video } from "../lib/youtube";
+
+interface Props {
+  videos: readonly Video[];
+  /**
+   * 관리자가 직접 등록한 영상.
+   * 화면이 열린 뒤 최신 목록을 다시 받아올 때도 이 영상들이 사라지지 않도록,
+   * 목록에 같이 넘겨 다시 합칩니다. (자동 수집 목록에는 들어있지 않기 때문)
+   */
+  registered?: readonly Video[];
+  /** 화면에 보여줄 개수 */
+  limit?: number;
+  /** 지정하면 그 종류의 영상만 보여줍니다. 생략하면 전부 보여줍니다. */
+  filter?: "sermon" | "event";
+  /** 카드 배열 방식을 바꿀 때 씁니다 (예: 1개만 보여줄 때 가운데 정렬) */
+  gridClass?: string;
+}
+
+const {
+  videos,
+  registered = [],
+  limit = 6,
+  filter,
+  gridClass = "mt-12 grid gap-7 sm:grid-cols-2 lg:grid-cols-3",
+} = Astro.props;
+const matched = filter ? videos.filter((v) => v.category === filter) : videos;
+const shown = matched.slice(0, limit);
+---
+
+{/*
+  영상 목록.
+
+  홈페이지를 만들 때 가져온 목록을 먼저 보여주고,
+  화면이 열린 뒤 /api/videos 로 최신 목록을 받아 조용히 갈아끼웁니다.
+  덕분에 새 영상을 올리면 홈페이지를 다시 만들지 않아도 반영됩니다.
+  요청이 실패하면 아무 일도 하지 않으므로 화면이 비는 일은 없습니다.
+
+  카드를 누르면 유튜브로 이동하지 않고, 화면 가운데 큰 창으로 재생됩니다.
+  (ESC 키·바깥 클릭·닫기 단추로 끕니다)
+*/}
+<div
+  class={gridClass}
+  data-video-grid
+  data-limit={limit}
+  data-filter={filter ?? ""}
+  data-registered={JSON.stringify(registered)}
+>
+  {
+    shown.map((v) => (
+      <div
+        data-video-card
+        data-video-id={v.id}
+        data-video-title={v.title}
+        class="overflow-hidden rounded-xl border border-sa-line bg-white transition-shadow hover:shadow-lg"
+      >
+        <button
+          type="button"
+          data-video-play
+          aria-label={`${v.title} 재생`}
+          class="group block aspect-video w-full overflow-hidden bg-sa-navy/10"
+        >
+          <span class="relative block h-full w-full">
+            <img
+              src={v.thumbnail}
+              alt=""
+              loading="lazy"
+              class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+            <span class="absolute inset-0 flex items-center justify-center">
+              <span class="flex h-14 w-14 items-center justify-center rounded-full bg-sa-red/90 text-white shadow-lg">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              </span>
+            </span>
+          </span>
+        </button>
+        <div class="p-5">
+          <p class="text-xs font-bold text-sa-muted">{formatDate(v.published)}</p>
+          <h3 class="mt-2 line-clamp-2 font-bold leading-snug">{v.title}</h3>
+          <a
+            href={v.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="mt-2 inline-block text-xs text-sa-muted underline decoration-dotted hover:text-sa-red"
+          >
+            유튜브에서 보기
+          </a>
+        </div>
+      </div>
+    ))
+  }
+</div>
+
+<script>
+  import { mergeVideos } from "../lib/youtube";
+
+  const fmt = (iso: string) => {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return "";
+    const p = (n: number) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}.${p(d.getMonth() + 1)}.${p(d.getDate())}`;
+  };
+
+  const escape = (s: string) =>
+    s.replace(/[&<>"]/g, (c) =>
+      c === "&" ? "&amp;" : c === "<" ? "&lt;" : c === ">" ? "&gt;" : "&quot;",
+    );
+
+  const embed = (id: string, title: string) => `<iframe
+      src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0"
+      title="${escape(title)}"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      referrerpolicy="strict-origin-when-cross-origin"
+      allowfullscreen
+      class="h-full w-full border-0"
+    ></iframe>`;
+
+  /**
+   * 재생 창(띄우는 창)은 화면에 하나만 두고 돌려 씁니다.
+   *
+   * 한 페이지에 영상 목록이 여러 개 있어도(홈 화면은 설교·행사 두 개)
+   * 창은 하나면 됩니다. 그래서 처음 누를 때 한 번만 만들어 둡니다.
+   */
+  let viewer: HTMLDialogElement | null = null;
+  let frame: HTMLElement;
+  let caption: HTMLElement;
+  let link: HTMLAnchorElement;
+
+  function buildViewer(): HTMLDialogElement {
+    const dlg = document.createElement("dialog");
+    // 가로 스크롤바가 생기지 않도록 vw 단위 없이 화면에 꽉 채웁니다.
+    dlg.className =
+      "video-viewer fixed inset-0 m-0 h-auto max-h-none w-auto max-w-none overflow-hidden border-0 bg-transparent p-0 backdrop:bg-sa-ink/95";
+    dlg.innerHTML = `
+      <div class="video-viewer-pad flex h-full w-full flex-col items-center justify-center gap-4 px-4 py-12 sm:px-8">
+        <button type="button" data-viewer-close aria-label="닫기"
+                class="absolute top-3 right-3 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-2xl leading-none text-white transition-colors hover:bg-white/25 sm:top-5 sm:right-5">
+          &times;
+        </button>
+        <div class="video-viewer-box shrink-0 overflow-hidden rounded-lg bg-black shadow-2xl"></div>
+        <div class="video-viewer-caption w-full max-w-3xl shrink-0 text-center">
+          <p data-viewer-title class="line-clamp-1 font-bold text-white"></p>
+          <a data-viewer-link href="#" target="_blank" rel="noopener noreferrer"
+             class="mt-1 inline-block text-xs text-white/60 underline decoration-dotted hover:text-white">
+            유튜브에서 보기
+          </a>
+        </div>
+      </div>`;
+    document.body.appendChild(dlg);
+
+    frame = dlg.querySelector<HTMLElement>(".video-viewer-box")!;
+    caption = dlg.querySelector<HTMLElement>("[data-viewer-title]")!;
+    link = dlg.querySelector<HTMLAnchorElement>("[data-viewer-link]")!;
+
+    dlg
+      .querySelector("[data-viewer-close]")!
+      .addEventListener("click", () => closeViewer());
+
+    // 영상 바깥(어두운 곳)을 누르면 닫습니다
+    dlg.addEventListener("click", (e) => {
+      if (!(e.target as HTMLElement).closest(".video-viewer-box")) closeViewer();
+    });
+
+    // ESC 키로 닫기.
+    // 띄운 창은 브라우저가 알아서 ESC 를 받아 주기도 하지만, 확실하게
+    // 동작하도록 직접 한 번 더 처리합니다.
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && dlg.open) {
+        e.preventDefault();
+        closeViewer();
+      }
+    });
+
+    // 브라우저가 스스로 창을 닫은 경우에도 뒷정리를 합니다
+    dlg.addEventListener("close", cleanUp);
+
+    return dlg;
+  }
+
+  /**
+   * 재생 화면을 지우고 뒤 배경 스크롤을 되돌립니다.
+   * 화면을 지우지 않으면 창을 닫아도 소리가 계속 납니다.
+   */
+  function cleanUp() {
+    if (frame) frame.innerHTML = "";
+    document.documentElement.style.overflow = "";
+  }
+
+  function closeViewer() {
+    cleanUp();
+    if (viewer?.open) viewer.close();
+  }
+
+  /** 눌린 카드의 영상을 큰 창으로 띄웁니다 */
+  function openViewer(card: HTMLElement) {
+    const id = card.dataset.videoId;
+    if (!id) return;
+    const title = card.dataset.videoTitle ?? "";
+
+    if (!viewer) viewer = buildViewer();
+    frame.innerHTML = embed(id, title);
+    caption.textContent = title;
+    link.href = `https://www.youtube.com/watch?v=${id}`;
+    document.documentElement.style.overflow = "hidden";
+    viewer.showModal();
+  }
+
+  /** 띄우는 창을 쓸 수 없는 브라우저에서는 예전처럼 그 자리에서 재생합니다 */
+  function playInline(card: HTMLElement) {
+    const id = card.dataset.videoId;
+    const playBtn = card.querySelector("[data-video-play]");
+    if (!id || !playBtn) return;
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "aspect-video w-full overflow-hidden bg-sa-navy/10";
+    wrapper.innerHTML = embed(id, card.dataset.videoTitle ?? "");
+    playBtn.replaceWith(wrapper);
+  }
+
+  const canModal = typeof HTMLDialogElement !== "undefined" &&
+    typeof HTMLDialogElement.prototype.showModal === "function";
+
+  function card(v: {
+    id: string;
+    url: string;
+    title: string;
+    published: string;
+    thumbnail: string;
+  }) {
+    return `
+      <div data-video-card data-video-id="${escape(v.id)}" data-video-title="${escape(v.title)}"
+           class="overflow-hidden rounded-xl border border-sa-line bg-white transition-shadow hover:shadow-lg">
+        <button type="button" data-video-play aria-label="${escape(v.title)} 재생"
+                class="group block aspect-video w-full overflow-hidden bg-sa-navy/10">
+          <span class="relative block h-full w-full">
+            <img src="${escape(v.thumbnail)}" alt="" loading="lazy"
+                 class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+            <span class="absolute inset-0 flex items-center justify-center">
+              <span class="flex h-14 w-14 items-center justify-center rounded-full bg-sa-red/90 text-white shadow-lg">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              </span>
+            </span>
+          </span>
+        </button>
+        <div class="p-5">
+          <p class="text-xs font-bold text-sa-muted">${fmt(v.published)}</p>
+          <h3 class="mt-2 line-clamp-2 font-bold leading-snug">${escape(v.title)}</h3>
+          <a href="${escape(v.url)}" target="_blank" rel="noopener noreferrer"
+             class="mt-2 inline-block text-xs text-sa-muted underline decoration-dotted hover:text-sa-red">
+            유튜브에서 보기
+          </a>
+        </div>
+      </div>`;
+  }
+
+  const grids = document.querySelectorAll<HTMLElement>("[data-video-grid]");
+  if (grids.length) {
+    // 카드를 눌렀을 때 큰 창으로 재생 (그리드가 새로 갈아 끼워져도
+    // 위임(delegation)이라 다시 연결할 필요가 없습니다)
+    grids.forEach((grid) => {
+      grid.addEventListener("click", (e) => {
+        const playBtn = (e.target as HTMLElement).closest("[data-video-play]");
+        if (!playBtn) return;
+        const card = playBtn.closest<HTMLElement>("[data-video-card]");
+        if (!card) return;
+        if (canModal) openViewer(card);
+        else playInline(card);
+      });
+    });
+
+    (async () => {
+      try {
+        const res = await fetch("/api/videos?limit=15", { cache: "no-cache" });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!Array.isArray(data.videos) || data.videos.length === 0) return;
+
+        grids.forEach((grid) => {
+          const limit = Number(grid.dataset.limit) || 6;
+          const filter = grid.dataset.filter;
+
+          // 자동 수집 목록에는 직접 등록한 영상이 없으므로, 화면을 갈아끼우기
+          // 전에 다시 합쳐 줍니다. 안 그러면 등록한 영상이 사라져 버립니다.
+          let registered = [];
+          try {
+            registered = JSON.parse(grid.dataset.registered || "[]");
+          } catch {
+            // 값이 깨져 있으면 자동 수집 목록만 씁니다
+          }
+          const all = mergeVideos(data.videos, registered);
+
+          const pool = filter
+            ? all.filter((v: any) => v.category === filter)
+            : all;
+          const next = pool.slice(0, limit);
+
+          const current = [...grid.querySelectorAll("[data-video-card]")].map(
+            (el) => (el as HTMLElement).dataset.videoId,
+          );
+          const same =
+            current.length === next.length &&
+            current.every((id, i) => id === next[i].id);
+          // 목록이 그대로면 화면을 건드리지 않습니다 (재생 중인 영상도 안 끊깁니다)
+          if (same) return;
+          grid.innerHTML = next.map(card).join("");
+        });
+      } catch {
+        // 실패 시 만들어 둔 목록을 그대로 둡니다
+      }
+    })();
+  }
+</script>
+
+{/*
+  재생 창은 자바스크립트로 만들기 때문에 아스트로의 범위 지정 스타일이
+  붙지 않습니다. 그래서 is:global 로 씁니다.
+*/}
+<style is:global>
+  .video-viewer-box {
+    aspect-ratio: 16 / 9;
+    /*
+      가로가 좁을 때도, 세로가 낮을 때도 비율이 깨지지 않게
+      너비를 두 방향에서 한 번에 계산합니다.
+      (10.5rem = 위아래 여백 6rem + 간격 1rem + 제목 칸 3.5rem)
+      화면 너비 단위(vw)는 가로 스크롤바를 만들 수 있어 쓰지 않습니다.
+    */
+    width: min(64rem, 100%, calc((100vh - 10.5rem) * 16 / 9));
+  }
+
+  /* 주소창이 오르내리는 휴대폰에서는 실제 보이는 높이를 씁니다 */
+  @supports (height: 100dvh) {
+    .video-viewer-box {
+      width: min(64rem, 100%, calc((100dvh - 10.5rem) * 16 / 9));
+    }
+  }
+
+  /*
+    휴대폰을 눕혔을 때처럼 화면이 낮으면 여백과 제목이 영상 자리를
+    다 잡아먹습니다. 그럴 때는 둘을 접어 영상을 크게 보여 줍니다.
+  */
+  @media (max-height: 30rem) {
+    .video-viewer-pad {
+      padding-top: 0.75rem;
+      padding-bottom: 0.75rem;
+    }
+    .video-viewer-caption {
+      display: none;
+    }
+    .video-viewer-box {
+      width: min(64rem, 100%, calc((100vh - 2rem) * 16 / 9));
+    }
+    @supports (height: 100dvh) {
+      .video-viewer-box {
+        width: min(64rem, 100%, calc((100dvh - 2rem) * 16 / 9));
+      }
+    }
+  }
+</style>

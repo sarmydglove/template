@@ -1,0 +1,144 @@
+@import "tailwindcss";
+
+/* ── 구세군체 (교단 공식 서체) ─────────────────────────── */
+@font-face {
+  font-family: "Salvation";
+  src: url("/fonts/salvation-regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Salvation";
+  src: url("/fonts/salvation-bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── 디자인 토큰 ──────────────────────────────────────── */
+@theme {
+  /* 방패 로고에서 추출한 실제 색상 */
+  --color-sa-red: #da0e2c;
+  --color-sa-red-dark: #a80a22;
+  --color-sa-red-soft: #fdf2f4;
+
+  /* 문장(crest) 계열 */
+  --color-sa-navy: #262a5e;
+  --color-sa-navy-dark: #1a1d42;
+  --color-sa-gold: #f5a623;
+  --color-sa-burgundy: #7a2a3a;
+
+  --color-sa-ink: #1c1c22;
+  --color-sa-muted: #5f6068;
+  --color-sa-line: #e5e3e0;
+  --color-sa-surface: #f7f5f2;
+
+  --font-sans: "Salvation", "Pretendard", -apple-system, BlinkMacSystemFont,
+    "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+}
+
+/* ── 기본 스타일 ──────────────────────────────────────── */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    color: var(--color-sa-ink);
+    background: #fff;
+    /* 어르신 가독성을 위해 기본 본문 크기 상향 */
+    font-size: 17px;
+    line-height: 1.75;
+    word-break: keep-all; /* 한글 단어 단위 줄바꿈 */
+  }
+
+  h1, h2, h3, h4 {
+    font-weight: 700;
+    line-height: 1.35;
+    letter-spacing: -0.02em;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-sa-red);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /*
+   * 히어로 그라데이션.
+   * 조감도가 밝은 주광 렌더링이라 균일한 어두운 막을 씌우면 건물이 탁해집니다.
+   * 글씨가 놓이는 쪽만 덮고 건물 쪽은 빠르게 걷어냅니다.
+   */
+  .hero-scrim {
+    /* 모바일: 글씨가 화면 전체 폭을 쓰므로 위→아래 방향 */
+    background: linear-gradient(
+      180deg,
+      rgba(26, 29, 66, 0.9) 0%,
+      rgba(26, 29, 66, 0.74) 48%,
+      rgba(26, 29, 66, 0.58) 100%
+    );
+  }
+
+  @media (min-width: 768px) {
+    .hero-scrim {
+      /* 데스크톱: 왼쪽만 덮고 62% 지점에서 완전히 투명 */
+      background: linear-gradient(
+        100deg,
+        rgba(26, 29, 66, 0.94) 0%,
+        rgba(26, 29, 66, 0.86) 22%,
+        rgba(26, 29, 66, 0.42) 44%,
+        rgba(26, 29, 66, 0) 62%
+      );
+    }
+  }
+
+  /*
+   * 예배와 모임 페이지 상단의 워터마크 사진.
+   * 배너처럼 딱 잘리지 않고, 위에서 옅게 시작해 예배 시간 카드
+   * 아래쯤에서 완전히 투명해지도록 알파 마스크로 자연스럽게 지웁니다.
+   */
+  .watermark-fade {
+    mask-image: linear-gradient(
+      180deg,
+      black 0%,
+      black 45%,
+      transparent 92%
+    );
+    -webkit-mask-image: linear-gradient(
+      180deg,
+      black 0%,
+      black 45%,
+      transparent 92%
+    );
+  }
+
+  /* 섹션 상단 소제목 — 붉은 짧은 선 + 라벨 */
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--color-sa-red);
+  }
+  .eyebrow::before {
+    content: "";
+    width: 1.75rem;
+    height: 2px;
+    background: var(--color-sa-red);
+  }
+}
+
+/* 모션 최소화 설정 존중 */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

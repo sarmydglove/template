@@ -1,0 +1,105 @@
+---
+import { church, navigation } from "../data/church";
+const { pathname } = Astro.url;
+---
+
+<header class="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-sa-line">
+  <div class="mx-auto max-w-6xl px-5">
+    <div class="flex h-20 items-center justify-between gap-4">
+      <!-- 로고 -->
+      <a href="/" class="flex items-center gap-3 shrink-0">
+        <img
+          src="/images/shield-128.png"
+          alt=""
+          width="40"
+          height="45"
+          class="h-11 w-auto"
+        />
+        <span class="leading-tight">
+          <span class="block text-[0.68rem] tracking-[0.18em] text-sa-muted">
+            THE SALVATION ARMY
+          </span>
+          <span class="block text-lg font-bold text-sa-ink">
+            구세군 대구사랑교회
+          </span>
+        </span>
+      </a>
+
+      <!-- 데스크톱 네비게이션 -->
+      <nav class="hidden lg:flex items-center gap-1" aria-label="주 메뉴">
+        {
+          navigation.map((item) => {
+            const active = pathname.startsWith(item.href);
+            return (
+              <a
+                href={item.href}
+                aria-current={active ? "page" : undefined}
+                class:list={[
+                  "rounded-md px-3.5 py-2 text-[0.97rem] font-bold transition-colors",
+                  active
+                    ? "text-sa-red bg-sa-red-soft"
+                    : "text-sa-ink hover:text-sa-red hover:bg-sa-red-soft",
+                ]}
+              >
+                {item.label}
+              </a>
+            );
+          })
+        }
+      </nav>
+
+      <!-- 모바일 메뉴 버튼 -->
+      <button
+        type="button"
+        id="menu-toggle"
+        class="lg:hidden inline-flex h-11 w-11 items-center justify-center rounded-md border border-sa-line text-sa-ink"
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+      >
+        <span class="sr-only">메뉴 열기</span>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+          <path d="M3 6h18M3 12h18M3 18h18"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- 모바일 메뉴 -->
+  <nav
+    id="mobile-menu"
+    class="hidden lg:hidden border-t border-sa-line bg-white"
+    aria-label="모바일 메뉴"
+  >
+    <ul class="mx-auto max-w-6xl px-5 py-3">
+      {
+        navigation.map((item) => (
+          <li>
+            <a
+              href={item.href}
+              class="block border-b border-sa-line/70 py-3.5 text-[1.05rem] font-bold text-sa-ink last:border-0"
+            >
+              {item.label}
+            </a>
+          </li>
+        ))
+      }
+      <li class="pt-3">
+        <a
+          href={`mailto:${church.email}`}
+          class="block rounded-md bg-sa-red px-4 py-3 text-center font-bold text-white"
+        >
+          이메일로 문의하기
+        </a>
+      </li>
+    </ul>
+  </nav>
+</header>
+
+<script>
+  const btn = document.getElementById("menu-toggle");
+  const menu = document.getElementById("mobile-menu");
+  btn?.addEventListener("click", () => {
+    const open = menu?.classList.toggle("hidden") === false;
+    btn.setAttribute("aria-expanded", String(open));
+  });
+</script>
