@@ -1,6 +1,15 @@
 {
   "videos": [
     {
+      "id": "8U3pr48oWKE",
+      "title": "'하나님 중심의 기도' 구세군대구사랑 설교쇼츠 37",
+      "published": "2026-10-29T01:15:17+00:00",
+      "thumbnail": "https://i1.ytimg.com/vi/8U3pr48oWKE/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=8U3pr48oWKE",
+      "isShort": true,
+      "category": "sermon"
+    },
+    {
       "id": "XOeRcjmO4kU",
       "title": "'뜻이 하늘에서 이루어진 것 같이' 대구사랑설교쇼츠36",
       "published": "2026-09-23T14:43:10+00:00",
@@ -125,15 +134,6 @@
       "url": "https://www.youtube.com/watch?v=c-hl-ysjccY",
       "isShort": false,
       "category": "event"
-    },
-    {
-      "id": "MHWg2_6j9Ps",
-      "title": "'하나님 알기를 교육하라' 구세군 대구사랑교회 설교쇼츠 #24",
-      "published": "2026-05-07T08:39:15+00:00",
-      "thumbnail": "https://i2.ytimg.com/vi/MHWg2_6j9Ps/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=MHWg2_6j9Ps",
-      "isShort": true,
-      "category": "sermon"
     }
   ]
 }
